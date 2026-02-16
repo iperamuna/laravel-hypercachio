@@ -1,34 +1,27 @@
-# Release Notes - v1.0.0
+# Release Notes - v1.0.1
 
 **Laravel Hyper-Cache-IO**
 
-We are thrilled to announce the first stable release of **Laravel Hyper-Cache-IO**, a high-performance, distributed cache driver designed specifically for modern Laravel applications running in multi-server environments (FrankenPHP, Swoole, Nginx/FPM clusters).
+We are pleased to release **v1.0.1**, which introduces improved CLI tooling for easier installation and enhanced CI reliability.
 
-## 🚀 Key Features
+## 🚀 Enhancements
 
-*   **SQLite WAL Backend**: Leveraging SQLite's Write-Ahead Logging for exceptional read/write speeds and reliability as a persistent storage layer.
-*   **L1 In-Memory Caching**: Automatic ephemeral memory caching for the duration of a request, minimizing disk I/O.
-*   **Split-Architecture**:
-    *   **Primary Role**: Handles writes directly to the SQLite database.
-    *   **Secondary Role**: Forwards write operations to the Primary node via a lightweight internal HTTP API, while reading from a local replica (or shared volume).
-*   **Atomic Operations**: robust support for `Cache::add()`, `Cache::lock()`, and atomic counters (`increment`/`decrement`), critical for high-concurrency applications.
-*   **Secure synchronization**: Internal API endpoints are secured with a configurable `api_token`.
-*   **Framework Compatibility**: Fully compatible with Laravel 10.x, 11.x, and 12.x on PHP 8.2, 8.3, and 8.4.
-*   **Robust CI/CD**: Integrated GitHub Actions workflow test matrix across all supported PHP and Laravel versions.
+*   **New Install Command**: Running `php artisan hypercachio:install` now automates the setup process by publishing configuration files and automatically injecting the `hypercachio` store configuration into your `config/cache.php`, resolving issues where the cache store wasn't detected by other packages (e.g., Spatie Permission).
+*   **Command Line Integration**: The installer handles `vendor:publish` and clears the configuration cache (`config:clear`) to ensure immediate availability of the new driver.
 
-## 🛠 Improvements in v1.0.0
+## 🛠 Fixes & Improvements
 
-*   **Garbage Collection**: Implemented probabilistic garbage collection (1% chance on write) to automatically prune expired cache keys, keeping the database lean.
-*   **Enhanced Reliability**: Added "Primary-only" fallback logic allowing the driver to function as a standalone robust cache without needing a secondary node.
-*   **Strict Typing**: Improved internal type safety and error handling.
-*   **Comprehensive Testing**: Added extensive integration tests covering both Primary and Secondary roles to ensure stability.
-*   **CI/CD Hardening**: Resolved dependency conflicts for Laravel 12 and optimized driver registration timing for testing environments.
+*   **CI/CD Stability**: Resolved "Driver not supported" errors in test environments by optimizing when and how the cache driver is registered in the Service Provider.
+*   **Style Compliance**: Applied Laravel Pint formatting across the codebase to ensure PSR-12 standard compliance.
+*   **Robust Testing**: Added a dedicated feature test (`InstallCommandTest`) to verify the installation command correctly modifies configuration files without duplication.
 
 ## 📦 Installation
 
+To upgrade or install freshly:
+
 ```bash
 composer require iperamuna/laravel-hypercachio
-php artisan vendor:publish --tag=hypercachio-config
+php artisan hypercachio:install
 ```
 
 ## 🙏 Acknowledgements
