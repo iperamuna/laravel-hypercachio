@@ -18,10 +18,10 @@ class HypercachioServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/../config/hypercachio.php' => config_path('hypercachio.php'),
+            __DIR__.'/../config/hypercachio.php' => config_path('hypercachio.php'),
         ], 'hypercachio-config');
 
-        $this->loadRoutesFrom(__DIR__ . '/../routes/hypercachio.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/hypercachio.php');
 
         $this->app->make('cache')->extend('hypercachio', function ($app, $config) {
             // Merge defaults from config/hypercachio.php with store-specific config from cache.php
@@ -38,6 +38,6 @@ class HypercachioServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/hypercachio.php', 'hypercachio');
+        $this->mergeConfigFrom(__DIR__.'/../config/hypercachio.php', 'hypercachio');
     }
 }
