@@ -2,22 +2,31 @@
 
 namespace Iperamuna\Hypercachio\Tests;
 
-use Tests\TestCase as BaseTestCase;
+use Orchestra\Testbench\TestCase as BaseTestCase;
+use Iperamuna\Hypercachio\HypercachioServiceProvider;
 
 class TestCase extends BaseTestCase
 {
+    protected function getPackageProviders($app)
+    {
+        return [
+            HypercachioServiceProvider::class,
+        ];
+    }
+
+    protected function getEnvironmentSetUp($app)
+    {
+        $app['config']->set('hypercachio.role', 'primary');
+        $app['config']->set('hypercachio.primary_url', 'http://test-server.test/api/hypercachio');
+        $app['config']->set('hypercachio.async_requests', false);
+        $app['config']->set('hypercachio.sqlite_path', __DIR__ . '/temp/cache.sqlite');
+        $app['config']->set('cache.stores.hypercachio', [
+            'driver' => 'hypercachio',
+        ]);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
-
-        config([
-            'hypercachio.role' => 'primary',
-            'hypercachio.primary_url' => 'http://test-server.test/api/hypercachio',
-            'hypercachio.async_requests' => false,
-            'hypercachio.sqlite_path' => __DIR__.'/temp/cache.sqlite',
-            'cache.stores.hypercachio' => [
-                'driver' => 'hypercachio',
-            ],
-        ]);
     }
 }
