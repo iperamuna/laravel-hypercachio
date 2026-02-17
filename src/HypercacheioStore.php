@@ -10,6 +10,7 @@ use Iperamuna\Hypercacheio\Concerns\InteractsWithSqlite;
 class HypercacheioStore implements LockProvider, Store
 {
     use InteractsWithSqlite;
+
     /**
      * The local L1 cache array.
      */
@@ -82,8 +83,6 @@ class HypercacheioStore implements LockProvider, Store
         }
     }
 
-
-
     protected function doRequest(string $method, string $endpoint, array $payload = [])
     {
         if ($this->async) {
@@ -100,11 +99,11 @@ class HypercacheioStore implements LockProvider, Store
         try {
 
             $promise = Http::timeout($this->timeout)
-                        ->withHeaders([
-                            'X-Hypercacheio-Token' => $this->apiToken,
-                            'X-Hypercacheio-Server-ID' => gethostname(),
-                        ])
-                        ->async()
+                ->withHeaders([
+                    'X-Hypercacheio-Token' => $this->apiToken,
+                    'X-Hypercacheio-Server-ID' => gethostname(),
+                ])
+                ->async()
                 ->$method("{$this->primaryUrl}/{$endpoint}", $payload);
 
             $this->promises[] = $promise;
@@ -117,10 +116,10 @@ class HypercacheioStore implements LockProvider, Store
     {
         try {
             $response = Http::timeout($this->timeout)
-                        ->withHeaders([
-                            'X-Hypercacheio-Token' => $this->apiToken,
-                            'X-Hypercacheio-Server-ID' => gethostname(),
-                        ])
+                ->withHeaders([
+                    'X-Hypercacheio-Token' => $this->apiToken,
+                    'X-Hypercacheio-Server-ID' => gethostname(),
+                ])
                 ->$method("{$this->primaryUrl}/{$endpoint}", $payload);
 
             if ($response->successful()) {
@@ -135,7 +134,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function get($key)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
         if (isset($this->l1[$prefixedKey])) {
             return $this->l1[$prefixedKey];
         }
@@ -145,7 +144,7 @@ class HypercacheioStore implements LockProvider, Store
             $stmt->execute([':key' => $prefixedKey]);
             $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-            if (!$row || ($row['expiration'] && $row['expiration'] < time())) {
+            if (! $row || ($row['expiration'] && $row['expiration'] < time())) {
                 return null;
             }
             $value = unserialize($row['value']);
@@ -166,7 +165,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function put($key, $value, $seconds = null)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
         $this->l1[$prefixedKey] = $value;
         $expiration = $seconds ? time() + (int) $seconds : null;
 
@@ -192,7 +191,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function add($key, $value, $seconds)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
         $expiration = $seconds ? time() + (int) $seconds : null;
 
         if ($this->role === 'primary') {
@@ -239,7 +238,7 @@ class HypercacheioStore implements LockProvider, Store
     protected function gc()
     {
         if (rand(1, 100) <= 1) { // 1% chance
-            $this->sqlite->exec('DELETE FROM cache WHERE expiration < ' . time());
+            $this->sqlite->exec('DELETE FROM cache WHERE expiration < '.time());
         }
     }
 
@@ -255,7 +254,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function forget($key)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
         unset($this->l1[$prefixedKey]);
 
         if ($this->role === 'primary') {
@@ -325,7 +324,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function acquireLock($key, $owner, $seconds)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
         $expiration = time() + $seconds;
 
         if ($this->role === 'primary') {
@@ -362,7 +361,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function releaseLock($key, $owner)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
 
         if ($this->role === 'primary') {
             $stmt = $this->sqlite->prepare('DELETE FROM cache_locks WHERE key=:key AND owner=:owner');
@@ -380,7 +379,7 @@ class HypercacheioStore implements LockProvider, Store
 
     public function getLockOwner($key)
     {
-        $prefixedKey = $this->prefix . $key;
+        $prefixedKey = $this->prefix.$key;
         if ($this->role === 'primary') {
             $stmt = $this->sqlite->prepare('SELECT owner FROM cache_locks WHERE key=:key');
             $stmt->execute([':key' => $prefixedKey]);

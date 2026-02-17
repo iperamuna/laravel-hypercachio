@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Artisan;
+
 use function Pest\Laravel\artisan;
 
 it('runs connectivity check successfully for primary role', function () {
@@ -10,8 +10,8 @@ it('runs connectivity check successfully for primary role', function () {
     config(['hypercacheio.api_token' => 'test-token']);
     config([
         'hypercacheio.secondaries' => [
-            ['name' => 'Secondary 1', 'url' => 'http://secondary1.test/api/hypercacheio']
-        ]
+            ['name' => 'Secondary 1', 'url' => 'http://secondary1.test/api/hypercacheio'],
+        ],
     ]);
 
     // Mock HTTP responses

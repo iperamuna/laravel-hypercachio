@@ -6,12 +6,12 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
-use function Laravel\Prompts\info;
 use function Laravel\Prompts\error;
-use function Laravel\Prompts\warning;
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\note;
-use function Laravel\Prompts\table;
 use function Laravel\Prompts\spin;
+use function Laravel\Prompts\table;
+use function Laravel\Prompts\warning;
 
 class ConnectivityCheckCommand extends Command
 {
@@ -42,7 +42,7 @@ class ConnectivityCheckCommand extends Command
 
         info('🔍 Hypercacheio Connectivity & Endpoint Check');
         note("Current server role: {$role}");
-        note('Hostname: ' . gethostname());
+        note('Hostname: '.gethostname());
 
         $results = [];
 
@@ -65,7 +65,7 @@ class ConnectivityCheckCommand extends Command
         );
 
         // Summary
-        $passed = collect($results)->filter(fn($row) => $row[3] === '✅ OK')->count();
+        $passed = collect($results)->filter(fn ($row) => $row[3] === '✅ OK')->count();
         $total = count($results);
         $failed = $total - $passed;
 
@@ -92,12 +92,12 @@ class ConnectivityCheckCommand extends Command
             return [];
         }
 
-        note('Checking ' . count($secondaries) . ' secondary server(s)...');
+        note('Checking '.count($secondaries).' secondary server(s)...');
 
         $results = [];
         foreach ($secondaries as $index => $secondary) {
             $url = rtrim($secondary['url'] ?? '', '/');
-            $label = $secondary['name'] ?? 'Secondary #' . ($index + 1);
+            $label = $secondary['name'] ?? 'Secondary #'.($index + 1);
 
             if (empty($url)) {
                 $results[] = [$label, 'N/A', 'N/A', '❌ Failed', '-', 'No URL configured'];
@@ -106,7 +106,7 @@ class ConnectivityCheckCommand extends Command
             }
 
             $checkResults = spin(
-                fn() => $this->runFullCheck($label, $url, $apiToken, $timeout),
+                fn () => $this->runFullCheck($label, $url, $apiToken, $timeout),
                 "Checking {$label}..."
             );
 
@@ -129,7 +129,7 @@ class ConnectivityCheckCommand extends Command
         note('Checking connectivity to primary server...');
 
         return spin(
-            fn() => $this->runFullCheck('Primary', $primaryUrl, $apiToken, $timeout),
+            fn () => $this->runFullCheck('Primary', $primaryUrl, $apiToken, $timeout),
             'Checking Primary...'
         );
     }
@@ -144,7 +144,7 @@ class ConnectivityCheckCommand extends Command
         }
 
         $results = [$pingResult];
-        $testKey = 'conn-check-' . Str::random(8);
+        $testKey = 'conn-check-'.Str::random(8);
 
         // 2. ADD (POST /add/{key})
         $results[] = $this->performRequest($label, $baseUrl, 'POST', "add/{$testKey}", [
@@ -180,26 +180,26 @@ class ConnectivityCheckCommand extends Command
 
     protected function performRequest(string $label, string $baseUrl, string $method, string $endpoint, array $data, string $apiToken, int $timeout): array
     {
-        $url = rtrim($baseUrl, '/') . '/' . ltrim($endpoint, '/');
+        $url = rtrim($baseUrl, '/').'/'.ltrim($endpoint, '/');
 
         try {
             $start = microtime(true);
 
             $response = Http::timeout($timeout)
-                        ->withHeaders([
-                            'X-Hypercacheio-Token' => $apiToken,
-                            'X-Hypercacheio-Server-ID' => gethostname(),
-                        ])
+                ->withHeaders([
+                    'X-Hypercacheio-Token' => $apiToken,
+                    'X-Hypercacheio-Server-ID' => gethostname(),
+                ])
                 ->$method($url, $data);
 
             $elapsed = round((microtime(true) - $start) * 1000, 1);
 
             $status = $response->successful() ? '✅ OK' : '❌ Failed';
-            $message = $response->successful() ? '-' : "HTTP {$response->status()}: " . Str::limit($response->body(), 40);
+            $message = $response->successful() ? '-' : "HTTP {$response->status()}: ".Str::limit($response->body(), 40);
 
             if ($endpoint === 'ping' && $response->successful()) {
                 $json = $response->json();
-                $message = 'Role: ' . ($json['role'] ?? '?') . ', Host: ' . ($json['hostname'] ?? '?');
+                $message = 'Role: '.($json['role'] ?? '?').', Host: '.($json['hostname'] ?? '?');
             }
 
             return [

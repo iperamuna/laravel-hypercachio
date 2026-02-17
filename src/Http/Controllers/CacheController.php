@@ -9,6 +9,7 @@ use Iperamuna\Hypercacheio\Concerns\InteractsWithSqlite;
 class CacheController extends Controller
 {
     use InteractsWithSqlite;
+
     /**
      * Create a new CacheController instance and initialize the SQLite connection.
      */
@@ -29,7 +30,7 @@ class CacheController extends Controller
         $stmt = $this->sqlite->prepare('SELECT value, expiration FROM cache WHERE key=:key');
         $stmt->execute([':key' => $key]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-        if (!$row || ($row['expiration'] && $row['expiration'] < time())) {
+        if (! $row || ($row['expiration'] && $row['expiration'] < time())) {
             return response()->json(null);
         }
 
