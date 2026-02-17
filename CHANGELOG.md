@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-02-17
+
+### Fixed
+- **Lock Acquisition**: Fixed an issue where lock acquisition and release on Secondary nodes failed when `async_requests` was enabled. These operations now always run synchronously to return the correct result.
+
 ## [1.3.0] - 2026-02-17
 
 ### Added

@@ -1,3 +1,23 @@
+# Release Notes - v1.3.1
+
+**Laravel Hyper-Cache-IO**
+
+This patch release fixes a critical issue with distributed locking on Secondary nodes.
+
+## 🐛 Bug Fixes
+
+*   **Lock Reliability**: Fixed an issue where `Cache::lock()` and `release()` would fail silently on Secondary servers if `async_requests` was enabled (default). These operations are now forced to run synchronously to ensure they return the correct `true` or `false` result, regardless of the async configuration.
+
+## 📦 Upgrade
+
+```bash
+composer update iperamuna/laravel-hypercacheio
+```
+
+This update is strongly recommended for all users operating in a Primary/Secondary cluster configuration.
+
+---
+
 # Release Notes - v1.3.0
 
 **Laravel Hyper-Cache-IO**

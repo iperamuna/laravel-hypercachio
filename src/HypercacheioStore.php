@@ -83,9 +83,9 @@ class HypercacheioStore implements LockProvider, Store
         }
     }
 
-    protected function doRequest(string $method, string $endpoint, array $payload = [])
+    protected function doRequest(string $method, string $endpoint, array $payload = [], bool $forceSync = false)
     {
-        if ($this->async) {
+        if ($this->async && ! $forceSync) {
             $this->asyncRequest($method, $endpoint, $payload);
 
             return null;
@@ -150,10 +150,7 @@ class HypercacheioStore implements LockProvider, Store
             $value = unserialize($row['value']);
         } else {
             // Secondary: Sync Fetch
-            $currentAsync = $this->async;
-            $this->async = false;
-            $value = $this->doRequest('get', "cache/{$prefixedKey}");
-            $this->async = $currentAsync;
+            $value = $this->doRequest('get', "cache/{$prefixedKey}", [], true);
         }
 
         if ($value !== null) {
@@ -217,10 +214,7 @@ class HypercacheioStore implements LockProvider, Store
                 return false;
             }
         } else {
-            $currentAsync = $this->async;
-            $this->async = false;
-            $response = $this->doRequest('post', "add/{$prefixedKey}", ['value' => $value, 'ttl' => $seconds]);
-            $this->async = $currentAsync;
+            $response = $this->doRequest('post', "add/{$prefixedKey}", ['value' => $value, 'ttl' => $seconds], true);
 
             return $response['added'] ?? false;
         }
@@ -353,7 +347,7 @@ class HypercacheioStore implements LockProvider, Store
             $response = $this->doRequest('post', "lock/{$prefixedKey}", [
                 'owner' => $owner,
                 'ttl' => $seconds,
-            ]);
+            ], true);
 
             return $response['acquired'] ?? false;
         }
@@ -371,7 +365,7 @@ class HypercacheioStore implements LockProvider, Store
         } else {
             $response = $this->doRequest('delete', "lock/{$prefixedKey}", [
                 'owner' => $owner,
-            ]);
+            ], true);
 
             return $response['released'] ?? false;
         }
