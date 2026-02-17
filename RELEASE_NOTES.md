@@ -1,3 +1,47 @@
+# Release Notes - v1.3.2
+
+**Laravel Hyper-Cache-IO**
+
+This release focuses on code quality, documentation, and test coverage improvements for the `HypercacheioSecondaryUrls` helper and the overall package configuration.
+
+## 🛠 Improvements
+
+*   **`HypercacheioSecondaryUrls` Helper Rewrite**: The helper function has been completely rewritten with:
+    *   Proper PHPDoc blocks with full `@param`, `@return`, and `@example` tags.
+    *   URL trimming — whitespace around URLs is automatically stripped.
+    *   Empty-entry filtering — consecutive delimiters, leading/trailing delimiters no longer produce empty entries.
+    *   URL validation — only entries passing `FILTER_VALIDATE_URL` are included; invalid URLs are silently discarded.
+    *   Fixed `$delimeter` → `$delimiter` typo and added explicit `string` type hint.
+    *   Cleaner functional implementation using `array_map`/`array_filter`.
+
+*   **Configuration Comments**: All config block comments in `config/hypercacheio.php` have been enhanced with detailed descriptions, `Env:` variable references, expected formats, default values, and practical guidance.
+
+*   **README Enhancements**:
+    *   Added `HYPERCACHEIO_SECONDARY_URLS` and `HYPERCACHEIO_ASYNC` environment variable documentation to the Primary Server setup section.
+    *   Added a full **Environment Variables Reference** table.
+    *   Refreshed the Advanced Configuration code block to match the actual config.
+
+## ✅ New Tests
+
+*   **13 new Pest tests** for `HypercacheioSecondaryUrls` covering:
+    *   Null, empty string, and whitespace-only input
+    *   Single and multiple URL parsing (with and without whitespace)
+    *   Empty-entry filtering from consecutive delimiters
+    *   Invalid URL rejection via `FILTER_VALIDATE_URL`
+    *   Custom delimiter support
+    *   Leading/trailing delimiter handling
+    *   Sequential array re-indexing
+
+## 📦 Upgrade
+
+```bash
+composer update iperamuna/laravel-hypercacheio
+```
+
+This update is fully backward compatible. No configuration changes are required.
+
+---
+
 # Release Notes - v1.3.1
 
 **Laravel Hyper-Cache-IO**

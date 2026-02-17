@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.2] - 2026-02-17
+
+### Improved
+- **`HypercacheioSecondaryUrls` Helper**: Rewrote with proper docblocks, URL trimming, empty-entry filtering, `FILTER_VALIDATE_URL` validation, fixed `$delimeter` → `$delimiter` typo, and added explicit `string` type hint for the delimiter parameter.
+- **Configuration Comments**: Enhanced all config block comments with detailed descriptions, env variable references, expected formats, and practical guidance.
+- **README**: Added `HYPERCACHEIO_SECONDARY_URLS` and `HYPERCACHEIO_ASYNC` documentation to the Primary Server setup section, added a full environment variable reference table, and refreshed the Advanced Configuration code block.
+
+### Added
+- **Helper Tests**: New `HypercacheioSecondaryUrlsTest.php` Pest test suite covering null/empty input, single URL, multiple URLs, whitespace trimming, invalid URL filtering, custom delimiters, and trailing delimiter handling.
+
 ## [1.3.1] - 2026-02-17
 
 ### Fixed

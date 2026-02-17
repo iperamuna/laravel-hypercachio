@@ -53,11 +53,18 @@ CACHE_DRIVER=hypercacheio
 Hyper-Cache-IO uses a simple **Primary/Secondary** architecture. You can also run it in standalone mode (Primary only).
 
 #### Primary Server (Writer)
-A single "Primary" node handles all write operations to the database.
+A single "Primary" node handles all write operations to the database. You can optionally list secondary server URLs so the primary replicates writes to them.
 
 ```dotenv
 HYPERCACHEIO_SERVER_ROLE=primary
 HYPERCACHEIO_API_TOKEN=your-secr3t-t0ken-here
+
+# Optional: comma-separated list of secondary server URLs for replication.
+# Invalid URLs are silently ignored. Whitespace around URLs is trimmed.
+HYPERCACHEIO_SECONDARY_URLS="https://s2.example.com,https://s3.example.com"
+
+# Optional: fire-and-forget async replication (default: true)
+HYPERCACHEIO_ASYNC=true
 ```
 
 #### Secondary Server (Reader)
@@ -65,86 +72,50 @@ HYPERCACHEIO_API_TOKEN=your-secr3t-t0ken-here
 
 ```dotenv
 HYPERCACHEIO_SERVER_ROLE=secondary
-HYPERCACHEIO_PRIMARY_URL=http://<primary-server-ip>/api/hypercacheio
+HYPERCACHEIO_PRIMARY_URL=https://primary.example.com/api/hypercacheio
 HYPERCACHEIO_API_TOKEN=your-secr3t-t0ken-here
 ```
 
 ### 3. Advanced Configuration
 
-You can fine-tune timeouts, paths, and behavior in `config/hypercacheio.php`:
+Publish and fine-tune the config file at `config/hypercacheio.php`:
 
 ```php
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Server Role
-    |--------------------------------------------------------------------------
-    |
-    | Define the role of this server: 'primary' or 'secondary'.
-    | - Primary: Handles writes internally to SQLite.
-    | - Secondary: Forwards writes to the Primary via HTTP.
-    |
-    */
+    // Server role: 'primary' or 'secondary'
     'role' => env('HYPERCACHEIO_SERVER_ROLE', 'primary'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Primary Server URL
-    |--------------------------------------------------------------------------
-    |
-    | The base URL of the Primary server's internal API. 
-    | Required only if this server is a 'secondary' node.
-    |
-    */
+    // Primary server API URL (used by secondary nodes)
     'primary_url' => env('HYPERCACHEIO_PRIMARY_URL', 'http://127.0.0.1/api/hypercacheio'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | API Security Token
-    |--------------------------------------------------------------------------
-    |
-    | A shared secret token to secure internal API communications between nodes.
-    |
-    */
-    'api_token' => env('HYPERCACHEIO_API_TOKEN', 'change_me_to_a_secure_token'),
+    // Comma-separated secondary server URLs for write replication
+    // Invalid URLs are silently discarded to prevent misconfiguration
+    'secondaries' => HypercacheioSecondaryUrls(env('HYPERCACHEIO_SECONDARY_URLS', ''), ','),
 
-    /*
-    |--------------------------------------------------------------------------
-    | HTTP Timeout
-    |--------------------------------------------------------------------------
-    |
-    | Timeout in seconds for internal HTTP requests.
-    |
-    */
-    'timeout' => 2,
+    // Shared secret for inter-server authentication (X-HyperCacheio-Token header)
+    'api_token' => env('HYPERCACHEIO_API_TOKEN', 'changeme'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Async Requests
-    |--------------------------------------------------------------------------
-    |
-    | If true, write operations from Secondary nodes will be fire-and-forget
-    | to improved performance (non-blocking).
-    |
-    */
-    'async_requests' => true,
+    // HTTP timeout in seconds for peer-server requests (recommended: 1–3)
+    'timeout' => 1,
 
-    /*
-    |--------------------------------------------------------------------------
-    | SQLite Storage Directory
-    |--------------------------------------------------------------------------
-    |
-    | The absolute path to the directory where the 'hypercacheio.sqlite' database 
-    | and its associated files (WAL, SHM) will be stored.
-    |
-    */
+    // Fire-and-forget async replication (lower latency, silent failures)
+    'async_requests' => env('HYPERCACHEIO_ASYNC', true),
+
+    // SQLite database directory (auto-created by the install command)
     'sqlite_path' => storage_path('cache/hypercacheio'),
-
 ];
 ```
 
----
+### 4. Environment Variables Reference
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `CACHE_DRIVER` | Set to `hypercacheio` to use this driver | — |
+| `HYPERCACHEIO_SERVER_ROLE` | `primary` or `secondary` | `primary` |
+| `HYPERCACHEIO_PRIMARY_URL` | Full URL of the primary server's API | `http://127.0.0.1/api/hypercacheio` |
+| `HYPERCACHEIO_SECONDARY_URLS` | Comma-separated secondary server URLs | _(empty)_ |
+| `HYPERCACHEIO_API_TOKEN` | Shared secret for inter-server auth | `changeme` |
+| `HYPERCACHEIO_ASYNC` | Enable fire-and-forget replication | `true` |
 
 ---
 ## 🔌 Connectivity Check

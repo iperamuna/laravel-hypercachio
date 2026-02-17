@@ -35,7 +35,10 @@
         "psr-4": {
             "Iperamuna\\Hypercacheio\\": "src/",
             "Iperamuna\\Hypercacheio\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "helpers/HypercacheioSecondaryUrls.php"
+        ]
     },
     "autoload-dev": {},
     "config": {
