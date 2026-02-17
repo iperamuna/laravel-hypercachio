@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2026-02-17
+
+### Added
+- **Named Routes**: Added names to all internal API routes (prefix `hypercacheio.`) for easier identification and management.
+
 ## [1.2.0] - 2026-02-17
 
 ### Changed

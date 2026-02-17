@@ -1,3 +1,31 @@
+# Release Notes - v1.2.1
+
+**Laravel Hyper-Cache-IO**
+
+This patch release adds names to the internal API routes for better identification and management within Laravel applications.
+
+## ✨ New Features
+
+*   **Named Routes**: All internal API routes now have names prefixed with `hypercacheio.`.
+    *   `hypercacheio.cache.get`
+    *   `hypercacheio.cache.add`
+    *   `hypercacheio.cache.put`
+    *   `hypercacheio.cache.forget`
+    *   `hypercacheio.cache.lock`
+    *   `hypercacheio.cache.release-lock`
+
+This makes it easier to use these routes with Laravel's `route()` helper and improves visibility in tools like `php artisan route:list`.
+
+## 📦 Upgrade
+
+```bash
+composer update iperamuna/laravel-hypercacheio
+```
+
+This update is drop-in compatible and recommended for all users.
+
+---
+
 # Release Notes - v1.2.0
 
 **Laravel Hyper-Cache-IO**
