@@ -1,3 +1,54 @@
+# Release Notes - v1.4.0
+
+**Laravel Hyper-Cache-IO**
+
+This major update introduces a high-performance Go-based synchronization server, robust service management, and enhanced connectivity diagnostics with firewall troubleshooting.
+
+## 🚀 Standalone Go Server (Experimental)
+
+We have introduced a standalone Go binary to handle inter-node cache synchronization.
+*   **Performance**: Drastically reduces the overhead of handling cache requests by bypassing the full Laravel framework stack for internal peer-to-peer communication.
+*   **Concurrency**: Built on Go's lightweight goroutines, allowing thousands of concurrent cache operations with minimal memory usage.
+*   **Daemon Mode**: Runs as a persistent background process.
+
+## 🛡️ Service Management
+
+You can now easily run the Go server as a system service with auto-restart capabilities:
+*   **Command**: `php artisan hypercacheio:go-server make-service`
+*   **Linux**: Generates a `systemd` unit file for high-availability deployments.
+*   **macOS**: Generates a `launchd` plist for local development or Apple Silicon servers.
+
+## 🔍 Intelligent Connectivity Diagnostics
+
+The `hypercacheio:connectivity-check` command is now significantly more powerful:
+*   **Pre-flight checks**: Pings the local node first to ensure the cache server (Laravel or Go) is actually listening.
+*   **Firewall Advice**: If a port is blocked, the command detects your OS and provides the exact `ufw`, `firewalld`, or `socketfilterfw` commands to unblock it.
+
+## 🛠 Improvements
+
+*   **Auto-Installation**: The Go server CLI can now detect if Go is missing and offer to install it via system package managers.
+*   **Improved CI**: GitHub Actions now verify Go server compilation across AMD64 and ARM64 architectures.
+*   **Test Suite**: Expanded coverage with new tests for the Go bridge and service management commands.
+
+## 📦 Upgrade
+
+```bash
+composer update iperamuna/laravel-hypercacheio
+```
+
+To switch to the Go server, update your `.env`:
+```dotenv
+HYPERCACHEIO_SERVER_TYPE=go
+```
+
+Then compile and start the server:
+```bash
+php artisan hypercacheio:go-server compile
+php artisan hypercacheio:go-server start
+```
+
+---
+
 # Release Notes - v1.3.2
 
 **Laravel Hyper-Cache-IO**

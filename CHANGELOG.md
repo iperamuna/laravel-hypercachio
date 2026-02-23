@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-02-23
+
+### Added
+- **High-Performance Go Server**: A standalone Go-based binary implementation of the synchronization server for ultra-low latency and higher concurrency compared to the PHP-based engine.
+- **Service Management CLI**: New `php artisan hypercacheio:go-server make-service` command that automatically generates systemd (Linux) and launchd (macOS) service files with built-in auto-restart functionality.
+- **Improved Go CLI**: The `hypercacheio:go-server` now supports `start`, `stop`, `restart`, `status`, `compile`, and `make-service` actions.
+- **OS-Specific Auto-Installation**: The Go server management command can now detect missing Go installations and offer to install Go via Homebrew (macOS) or apt-get (Linux).
+- **GitHub Workflow**: Unified CI/CD pipeline including Go 1.23 environment, multi-platform compilation checks, and parallel test execution across PHP 8.2-8.4 and Laravel 10-12.
+
+### Improved
+- **Connectivity Check Intelligence**: The `hypercacheio:connectivity-check` command now identifies server types (Laravel vs Go) and performs local health pings before remote checks.
+- **Firewall Discovery**: Connectivity check now provides proactive OS-specific firewall advice (ufw, firewalld, socketfilterfw) when connection failures are detected.
+- **Test Coverage**: Added three new feature test suites: `GoServerCommandTest.php`, `ServerHandlerCommandTest.php`, and expanded `ConnectivityCheckCommandTest.php`.
+
+### Fixed
+- **CLI Standard Output**: Refactored `ServerHandlerCommand` to use Symfony CLI output instead of raw `echo`, improving reliability and enabling better automated testing.
+
 ## [1.3.2] - 2026-02-17
 
 ### Improved

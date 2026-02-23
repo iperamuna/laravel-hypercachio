@@ -14,6 +14,8 @@ Designed for modern PHP environments like **FrankenPHP**, **Swoole**, and tradit
 
 - **🚀 High Performance**: Built on SQLite WAL (Write-Ahead Logging) for lightning-fast reads and writes.
 - **🧠 L1 In-Memory Cache**: Ephemeral memory caching for instant access during the request lifecycle.
+- **🐹 Go Server (New)**: Optional standalone Go-based binary for high-concurrency inter-server synchronization.
+- **🛡️ Service Management**: Built-in support for running as a systemd (Linux) or launchd (macOS) service with auto-restart.
 - **🔒 Distributed Locking**: Full support for atomic locks across multiple servers.
 - **⚡ Atomic Operations**: Native support for `Cache::add()` and atomic `increment`/`decrement`.
 - **🌐 HTTP Synchronization**: Robust Primary/Secondary architecture for multi-node setups.
@@ -116,6 +118,42 @@ return [
 | `HYPERCACHEIO_SECONDARY_URLS` | Comma-separated secondary server URLs | _(empty)_ |
 | `HYPERCACHEIO_API_TOKEN` | Shared secret for inter-server auth | `changeme` |
 | `HYPERCACHEIO_ASYNC` | Enable fire-and-forget replication | `true` |
+| `HYPERCACHEIO_SERVER_TYPE` | `laravel` (default) or `go` | `laravel` |
+
+---
+
+## 🐹 Go Server Implementation (Experimental)
+
+For high-traffic applications, you can use the standalone Go server instead of the built-in Laravel routes. This provides ultra-low latency and handles concurrent synchronization requests more efficiently.
+
+### 1. Enable Go Server
+Update your `.env`:
+```dotenv
+HYPERCACHEIO_SERVER_TYPE=go
+```
+
+### 2. Compile & Start
+The package includes a management CLI for the Go daemon:
+
+```bash
+# 🛠️ Compile the binary for your system (detects macOS/Linux)
+php artisan hypercacheio:go-server compile
+
+# 🚀 Start the server as a background process
+php artisan hypercacheio:go-server start
+
+# 📊 Check status
+php artisan hypercacheio:go-server status
+```
+
+### 3. Run as a System Service
+To ensure the Go server stays running after a crash or system reboot, generate a service configuration:
+
+```bash
+php artisan hypercacheio:go-server make-service
+```
+
+Follow the on-screen instructions to copy the generated file to your system's service directory (`systemd` for Linux or `launchd` for macOS).
 
 ---
 ## 🔌 Connectivity Check

@@ -147,4 +147,39 @@ return [
     */
     'async_requests' => env('HYPERCACHEIO_ASYNC', true),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Server Type
+    |--------------------------------------------------------------------------
+    |
+    | Choose the server implementation for handling inter-server cache sync.
+    |   - 'laravel' (default) → Uses the built-in Laravel routes and controllers.
+    |   - 'go'                → Uses a standalone Go-based binary server.
+    |
+    | Env: HYPERCACHEIO_SERVER_TYPE
+    |
+    */
+    'server_type' => env('HYPERCACHEIO_SERVER_TYPE', 'laravel'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Go Server Configuration
+    |--------------------------------------------------------------------------
+    |
+    | settings for the standalone Go server daemon.
+    |
+    */
+    'go_server' => [
+        'host' => env('HYPERCACHEIO_GO_HOST', '127.0.0.1'),
+        'port' => env('HYPERCACHEIO_GO_PORT', '8080'),
+        'ssl' => [
+            'enabled' => env('HYPERCACHEIO_GO_SSL_ENABLED', false),
+            'certificate' => env('HYPERCACHEIO_GO_SSL_CERT', ''),
+            'certificate_key' => env('HYPERCACHEIO_GO_SSL_KEY', ''),
+        ],
+        'bin_path' => null, // If null, the command will try to find the correct binary in the package build folder.
+        'log_path' => storage_path('logs/hypercacheio-server.log'),
+        'pid_path' => storage_path('hypercacheio-server.pid'),
+    ],
+
 ];

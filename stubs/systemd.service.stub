@@ -1,0 +1,16 @@
+[Unit]
+Description=Hypercacheio Go Server
+After=network.target
+
+[Service]
+Type=simple
+User={{USER}}
+WorkingDirectory={{WORKING_DIRECTORY}}
+ExecStart={{COMMAND}}
+Restart=always
+RestartSec=3
+StandardOutput=append:{{LOG_PATH}}
+StandardError=append:{{LOG_PATH}}
+
+[Install]
+WantedBy=multi-user.target
