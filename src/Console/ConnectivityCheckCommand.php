@@ -255,7 +255,11 @@ class ConnectivityCheckCommand extends Command
         try {
             $start = microtime(true);
 
-            $response = Http::timeout($timeout)
+            // Using Guzzle options directly provides better handling for cURL timeouts (error 28)
+            $response = Http::withOptions([
+                'connect_timeout' => max(1, $timeout),
+                'timeout' => max(2, $timeout + 1), // Allow an extra second for transfer
+            ])
                 ->withHeaders([
                     'X-Hypercacheio-Token' => $apiToken,
                     'X-Hypercacheio-Server-ID' => gethostname(),
