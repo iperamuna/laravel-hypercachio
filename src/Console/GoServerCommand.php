@@ -81,23 +81,24 @@ class GoServerCommand extends Command
 
         $this->info('Compiling Go server binaries...');
         $goPath = __DIR__.'/../../go-server';
-        $binDir = config('hypercacheio.go_server.build_path', storage_path('hypercacheio/bin'));
+        $binDir = config('hypercacheio.go_server.build_path');
 
         if (! File::exists($binDir)) {
             File::makeDirectory($binDir, 0755, true);
         }
 
+        $binDir = realpath($binDir) ?: $binDir;
         $result = 1;
         $output = [];
 
         if (File::exists($goPath.'/Makefile')) {
             $this->info('Found Makefile, building all architectures...');
-            $command = "cd $goPath && make all";
+            $command = "cd $goPath && OUT_DIR=\"$binDir\" make all";
             exec($command, $output, $result);
         } else {
             $this->info('Makefile not found, building for current platform only...');
             $binName = $this->getBinaryName();
-            $command = "cd $goPath && go build -o ../build/$binName main.go";
+            $command = "cd $goPath && go build -o \"$binDir/$binName\" main.go";
             exec($command, $output, $result);
         }
 
@@ -199,7 +200,7 @@ class GoServerCommand extends Command
 
     protected function detectBinary()
     {
-        $binDir = config('hypercacheio.go_server.build_path', storage_path('hypercacheio/bin'));
+        $binDir = config('hypercacheio.go_server.build_path');
         $binName = $this->getBinaryName();
         $path = $binDir.'/'.$binName;
 
