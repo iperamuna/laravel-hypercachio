@@ -82,3 +82,19 @@ it('fails when local server check fails and shows firewall advice', function () 
         ->expectsOutputToContain('is not responding at: http://127.0.0.1:8081/api/hypercacheio')
         ->assertExitCode(1);
 });
+
+it('bypasses local ping check when disable_local_ping_check is true', function () {
+    config(['hypercacheio.role' => 'primary']);
+    config(['hypercacheio.server_type' => 'go']);
+    config(['hypercacheio.api_token' => 'test-token']);
+    config(['hypercacheio.go_server.port' => 8081]);
+    config(['hypercacheio.go_server.host' => '127.0.0.1']);
+    config(['hypercacheio.go_server.ssl.enabled' => false]);
+    config(['hypercacheio.go_server.disable_local_ping_check' => true]);
+
+    // Even without an active HTTP mock or listening server, this should pass the local check phase
+    // because it skips pinging. The exit code will be 0 since there are no remote servers to check.
+    artisan('hypercacheio:connectivity-check')
+        ->doesntExpectOutputToContain('is not responding at')
+        ->assertExitCode(0);
+});
