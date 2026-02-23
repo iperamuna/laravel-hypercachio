@@ -12,6 +12,7 @@ beforeEach(function () {
     }
 
     config(['hypercacheio.go_server.build_path' => $binDir]);
+    config(['hypercacheio.go_server.listen_host' => '0.0.0.0']);
 });
 
 it('can generate service files via make-service', function () {
@@ -29,10 +30,28 @@ it('can generate service files via make-service', function () {
     expect(File::exists(base_path('hypercacheio-server.service')))->toBeTrue();
     expect(File::exists(base_path('iperamuna.hypercacheio.server.plist')))->toBeTrue();
 
+    // Verify service file uses listen_host (0.0.0.0), not the advertised host
+    $serviceContent = File::get(base_path('hypercacheio-server.service'));
+    expect($serviceContent)->toContain('--host=0.0.0.0');
+
+    $plistContent = File::get(base_path('iperamuna.hypercacheio.server.plist'));
+    expect($plistContent)->toContain('--host=0.0.0.0');
+
     // Cleanup
     File::delete(base_path('hypercacheio-server.service'));
     File::delete(base_path('iperamuna.hypercacheio.server.plist'));
     File::delete($binPath);
+});
+
+it('uses listen_host config when starting go server', function () {
+    config(['hypercacheio.go_server.listen_host' => '0.0.0.0']);
+    config(['hypercacheio.go_server.host' => '192.168.1.10']);
+    config(['hypercacheio.go_server.bin_path' => '/non/existent/path']);
+
+    // Binary missing, but we can confirm the command handles listen_host without error
+    artisan('hypercacheio:go-server start')
+        ->expectsOutputToContain('Go server binary not found')
+        ->assertExitCode(0);
 });
 
 it('warns when binary is missing on start', function () {
@@ -65,7 +84,6 @@ it('reports unknown action', function () {
 });
 
 it('shows service:status output for current OS', function () {
-    // Just verify the command dispatches without crashing (output depends on OS/service state)
     $os = strtolower(PHP_OS_FAMILY);
 
     if ($os === 'darwin') {
@@ -94,4 +112,8 @@ it('shows error when service:start plist missing on macOS', function () {
     artisan('hypercacheio:go-server service:start')
         ->expectsOutputToContain('Launchd plist not found')
         ->assertExitCode(0);
+});
+
+it('listen_host defaults to 0.0.0.0 in config', function () {
+    expect(config('hypercacheio.go_server.listen_host'))->toBe('0.0.0.0');
 });

@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.5] - 2026-02-24
+
+### Added
+- **`listen_host` config key** (`HYPERCACHEIO_GO_LISTEN_HOST`, defaults to `0.0.0.0`): The Go daemon now binds to `listen_host` while `host` remains the external/advertised IP used by secondaries. This fixes connectivity check failures on cloud servers where the LAN IP cannot be reached from the same host.
+
+### Changed
+- `hypercacheio:go-server start` and `make-service` now pass `listen_host` as `--host` to the binary instead of the advertised `host`.
+
+### Upgrade Note
+Regenerate and reinstall your service file to apply the new binding:
+```bash
+php artisan hypercacheio:go-server make-service
+sudo cp hypercacheio-server.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl restart hypercacheio-server
+```
+
+## [1.4.4] - 2026-02-24
+
+### Fixed
+- **Connectivity Check local ping**: Now tries `127.0.0.1` first (fast-fail on ECONNREFUSED), then falls back to the configured host. Handles both servers bound to all interfaces and servers bound to a specific LAN/external IP.
+
+## [1.4.3] - 2026-02-24
+
+### Fixed
+- **`go-server status`**: Now uses a 3-tier detection strategy:
+  1. PID file (artisan-managed process)
+  2. `systemctl is-active` / `launchctl list` (system-service-managed process)
+  3. `pgrep -a hypercacheio-server` (process scan fallback)
+  Previously the command always reported "NOT running" when the service was started via systemd.
+
 ## [1.4.2] - 2026-02-24
 
 ### Added

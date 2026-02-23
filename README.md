@@ -119,6 +119,9 @@ return [
 | `HYPERCACHEIO_API_TOKEN` | Shared secret for inter-server auth | `changeme` |
 | `HYPERCACHEIO_ASYNC` | Enable fire-and-forget replication | `true` |
 | `HYPERCACHEIO_SERVER_TYPE` | `laravel` (default) or `go` | `laravel` |
+| `HYPERCACHEIO_GO_HOST` | External/advertised IP of the Go server (used by secondaries) | `127.0.0.1` |
+| `HYPERCACHEIO_GO_LISTEN_HOST` | IP the Go daemon **binds** to. Use `0.0.0.0` to listen on all interfaces | `0.0.0.0` |
+| `HYPERCACHEIO_GO_PORT` | Port the Go server listens on | `8080` |
 
 ---
 
@@ -130,7 +133,17 @@ For high-traffic applications, you can use the standalone Go server instead of t
 Update your `.env`:
 ```dotenv
 HYPERCACHEIO_SERVER_TYPE=go
+
+# External IP that secondary servers use to reach this node
+HYPERCACHEIO_GO_HOST=10.80.3.131
+HYPERCACHEIO_GO_PORT=8185
+
+# IP the daemon binds to — 0.0.0.0 (default) listens on all interfaces.
+# This allows local health-checks via 127.0.0.1 to work even on dedicated LAN IPs.
+HYPERCACHEIO_GO_LISTEN_HOST=0.0.0.0
 ```
+
+> **`host` vs `listen_host`**: `host` is the *advertised* address (what others connect to). `listen_host` is what the daemon *binds* to. Keep `listen_host=0.0.0.0` unless you need to restrict which interface the daemon uses.
 
 ### 2. Compile & Start
 The package includes a full management CLI for the Go daemon:
@@ -142,7 +155,7 @@ php artisan hypercacheio:go-server compile
 # 🚀 Start the server as a background process
 php artisan hypercacheio:go-server start
 
-# 📊 Check daemon status (PID-based)
+# 📊 Check daemon status (PID / systemd / launchd / process scan)
 php artisan hypercacheio:go-server status
 
 # 🔄 Restart the daemon
@@ -167,7 +180,7 @@ php artisan hypercacheio:go-server make-service
 # Step 3: Manage via Artisan
 php artisan hypercacheio:go-server service:start   # Load and start the service
 php artisan hypercacheio:go-server service:stop    # Stop the service
-php artisan hypercacheio:go-server service:status  # View service status
+php artisan hypercacheio:go-server service:status  # View service status (systemd/launchd output)
 php artisan hypercacheio:go-server service:remove  # Disable and remove the service
 ```
 
@@ -182,7 +195,7 @@ php artisan hypercacheio:connectivity-check
 
 This command:
 - **Identifies** server type (LARAVEL or GO) with host and port
-- **Pings** the local node first to ensure the cache server is listening
+- **Pings** the local node first via `127.0.0.1` (falls back to configured host)
 - **Tests** Ping, Add, Get, Put, Delete, Lock against all configured endpoints
 - **Reports** OS-specific firewall advice (ufw, firewalld, socketfilterfw) when a connection fails
 
