@@ -178,6 +178,7 @@ return [
             'certificate_key' => env('HYPERCACHEIO_GO_SSL_KEY', ''),
         ],
         'bin_path' => null, // If null, the command will try to find the correct binary in the package build folder.
+        'build_path' => __DIR__ . '/../build',
         'log_path' => storage_path('logs/hypercacheio-server.log'),
         'pid_path' => storage_path('hypercacheio-server.pid'),
     ],

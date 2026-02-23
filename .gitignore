@@ -8,7 +8,6 @@ vendor/
 *.log
 composer.lock
 phpunit.xml
-build/
 .phpunit.cache/
 iperamuna.hypercacheio.server.plist
 hypercacheio-server.service
