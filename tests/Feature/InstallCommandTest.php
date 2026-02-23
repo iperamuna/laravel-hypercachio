@@ -6,7 +6,7 @@ beforeEach(function () {
     // Mock the config_path for testing
     // Testbench doesn't actually have a writeable config/cache.php by default that persists
     // So we need to ensure one exists in our test environment to modify
-    if (! file_exists(config_path())) {
+    if (!file_exists(config_path())) {
         mkdir(config_path(), 0755, true);
     }
 
@@ -41,7 +41,7 @@ test('it installs hypercacheio config, modifies cache.php and updates gitignore'
 
     // Verify .gitignore was updated
     $gitignoreContent = File::get($gitignorePath);
-    expect($gitignoreContent)->toContain('/storage/cache/hypercacheio/');
+    expect($gitignoreContent)->toContain('/storage/hypercacheio/');
 
     // Cleanup
     File::delete($gitignorePath);

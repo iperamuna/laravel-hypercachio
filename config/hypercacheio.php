@@ -91,10 +91,10 @@ return [
     | if it does not already exist. Ensure the web server process has
     | read/write permissions on this path.
     |
-    | Default: storage/cache/hypercacheio
+    | Default: storage/hypercacheio
     |
     */
-    'sqlite_path' => storage_path('cache/hypercacheio'),
+    'sqlite_path' => storage_path('hypercacheio'),
 
     /*
     |--------------------------------------------------------------------------
@@ -177,8 +177,8 @@ return [
             'certificate' => env('HYPERCACHEIO_GO_SSL_CERT', ''),
             'certificate_key' => env('HYPERCACHEIO_GO_SSL_KEY', ''),
         ],
-        'bin_path' => null, // If null, the command will try to find the correct binary in the package build folder.
-        'build_path' => __DIR__ . '/../build',
+        'bin_path' => null, // If null, the command will try to find the correct binary in the build folder.
+        'build_path' => storage_path('hypercacheio/bin'),
         'log_path' => storage_path('logs/hypercacheio-server.log'),
         'pid_path' => storage_path('hypercacheio-server.pid'),
     ],

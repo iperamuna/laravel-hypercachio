@@ -13,7 +13,7 @@ class HypercacheioService
      */
     public function __construct()
     {
-        $directory = config('hypercacheio.sqlite_path') ?? storage_path('cache/hypercacheio');
+        $directory = config('hypercacheio.sqlite_path') ?? storage_path('hypercacheio');
         $this->initSqlite($directory);
     }
 
@@ -26,7 +26,7 @@ class HypercacheioService
         $stmt->execute([':key' => $key]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if (! $row || ($row['expiration'] && $row['expiration'] < time())) {
+        if (!$row || ($row['expiration'] && $row['expiration'] < time())) {
             return null;
         }
 

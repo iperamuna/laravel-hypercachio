@@ -81,7 +81,7 @@ class GoServerCommand extends Command
 
         $this->info('Compiling Go server binaries...');
         $goPath = __DIR__ . '/../../go-server';
-        $binDir = config('hypercacheio.go_server.build_path', __DIR__ . '/../../build');
+        $binDir = config('hypercacheio.go_server.build_path', storage_path('hypercacheio/bin'));
 
         if (!File::exists($binDir)) {
             File::makeDirectory($binDir, 0755, true);
@@ -164,7 +164,7 @@ class GoServerCommand extends Command
         $binPath = $config['bin_path'] ?? $this->detectBinary();
 
         if (!$binPath || !File::exists($binPath)) {
-            $this->error('Go server binary not found. Tested path: ' . ($binPath ?: 'none') . ". Please run 'php artisan hypercacheio:go-server compile' first.");
+            $this->warn('Go server binary not found. Tested path: ' . ($binPath ?: 'none') . ". Please run 'php artisan hypercacheio:go-server compile' first.");
 
             return;
         }
@@ -199,7 +199,7 @@ class GoServerCommand extends Command
 
     protected function detectBinary()
     {
-        $binDir = config('hypercacheio.go_server.build_path', __DIR__ . '/../../build');
+        $binDir = config('hypercacheio.go_server.build_path', storage_path('hypercacheio/bin'));
         $binName = $this->getBinaryName();
         $path = $binDir . '/' . $binName;
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2026-02-24
+
+### Changed
+- **Storage Path Simplification**: Consolidated all internal storage (SQLite database and Go binaries) from `storage/cache/hypercacheio/` to `storage/hypercacheio/` for a cleaner directory structure.
+- **Go Build Pipeline**: Improved Go server compilation to use the consolidated storage path, and removed binaries from the main package to reduce bundle size and encourage environment-specific builds.
+
 ## [1.4.0] - 2026-02-23
 
 ### Added

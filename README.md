@@ -104,7 +104,7 @@ return [
     'async_requests' => env('HYPERCACHEIO_ASYNC', true),
 
     // SQLite database directory (auto-created by the install command)
-    'sqlite_path' => storage_path('cache/hypercacheio'),
+    'sqlite_path' => storage_path('hypercacheio'),
 ];
 ```
 

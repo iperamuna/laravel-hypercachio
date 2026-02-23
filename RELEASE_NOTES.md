@@ -1,3 +1,36 @@
+# Release Notes - v1.4.1
+
+**Laravel Hyper-Cache-IO**
+
+This update focuses on simplifying the storage architecture and optimizing the package footprint.
+
+## 📁 Storage Consolidation
+
+We have moved the default storage location from `storage/cache/hypercacheio/` to a more direct `storage/hypercacheio/`. This affects:
+*   **Database**: The SQLite file is now at `storage/hypercacheio/hypercacheio.sqlite`.
+*   **Go Binaries**: Compiled Go servers are now stored in `storage/hypercacheio/bin/`.
+
+These paths remain fully configurable via `config/hypercacheio.php`.
+
+## 📦 Package Optimization
+
+*   **Binaries Removed**: Pre-compiled Go binaries have been removed from the core package. This significantly reduces the installation size and ensures that the server is always compiled specifically for your environment's OS and architecture.
+*   **CI Improvements**: CI pipelines have been adjusted to handle the new directory structures.
+
+## 📦 Upgrade
+
+If you are upgrading from `v1.4.0`, please move your existing data:
+```bash
+mv storage/cache/hypercacheio storage/hypercacheio
+```
+
+Then update your package:
+```bash
+composer update iperamuna/laravel-hypercacheio
+```
+
+---
+
 # Release Notes - v1.4.0
 
 **Laravel Hyper-Cache-IO**
