@@ -185,6 +185,12 @@ return [
          */
         'listen_host' => env('HYPERCACHEIO_GO_LISTEN_HOST', '0.0.0.0'),
 
+        /*
+         * Disable the local HTTP health check during connectivity tests.
+         * Useful if firewall rules (e.g. UFW) block local loopback access.
+         */
+        'disable_local_ping_check' => env('HYPERCACHEIO_GO_DISABLE_LOCAL_PING', false),
+
         'port' => env('HYPERCACHEIO_GO_PORT', '8080'),
         'ssl' => [
             'enabled' => env('HYPERCACHEIO_GO_SSL_ENABLED', false),

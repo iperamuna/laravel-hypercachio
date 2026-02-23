@@ -52,35 +52,38 @@ class ConnectivityCheckCommand extends Command
         }
 
         // 1. Check Local Server Status
-        // Try 127.0.0.1 first (works when bound to 0.0.0.0), fall back to configured host
-        // (works when bound to a specific LAN/external IP).
-        $localUrls = $this->getLocalUrls($serverType);
-        $localResult = null;
-        $localUrl = $localUrls[0];
+        // For Go server, loopback ping might be blocked by UFW.
+        if (config('hypercacheio.go_server.disable_local_ping_check')) {
+            $localResult = ['Local Server', '/ping', 'GET', '✅ OK (Skipped)', '-', 'Ping check bypassed via config'];
+        } else {
+            $localUrls = $this->getLocalUrls($serverType);
+            $localResult = null;
+            $localUrl = $localUrls[0];
 
-        $localResult = spin(function () use ($localUrls, $apiToken, $timeout, &$localUrl) {
-            foreach ($localUrls as $url) {
-                $result = $this->performRequest('Local Server', $url, 'GET', 'ping', [], $apiToken, $timeout);
-                if ($result[3] === '✅ OK') {
+            $localResult = spin(function () use ($localUrls, $apiToken, $timeout, &$localUrl) {
+                foreach ($localUrls as $url) {
+                    $result = $this->performRequest('Local Server', $url, 'GET', 'ping', [], $apiToken, $timeout);
+                    if ($result[3] === '✅ OK') {
+                        $localUrl = $url;
+
+                        return $result;
+                    }
+                    // If connection refused (not timeout), try next URL immediately
+                    if (str_contains($result[5], 'error 7') || str_contains($result[5], 'Connection refused')) {
+                        continue;
+                    }
+                    // Timeout or other fatal error — no point trying the same port on another IP
                     $localUrl = $url;
 
                     return $result;
                 }
-                // If connection refused (not timeout), try next URL immediately
-                if (str_contains($result[5], 'error 7') || str_contains($result[5], 'Connection refused')) {
-                    continue;
-                }
-                // Timeout or other fatal error — no point trying the same port on another IP
-                $localUrl = $url;
+                $localUrl = end($localUrls);
 
-                return $result;
-            }
-            $localUrl = end($localUrls);
+                return $this->performRequest('Local Server', $localUrl, 'GET', 'ping', [], $apiToken, $timeout);
+            }, 'Checking local '.strtoupper($serverType).' server...');
+        }
 
-            return $this->performRequest('Local Server', $localUrl, 'GET', 'ping', [], $apiToken, $timeout);
-        }, 'Checking local '.strtoupper($serverType).' server...');
-
-        if ($localResult[3] !== '✅ OK') {
+        if ($localResult[3] !== '✅ OK' && $localResult[3] !== '✅ OK (Skipped)') {
             error('❌ Local '.strtoupper($serverType)." server is not responding at: $localUrl");
             note('Reason: '.$localResult[5]);
 
