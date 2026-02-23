@@ -270,20 +270,58 @@ class GoServerCommand extends Command
     protected function status()
     {
         $pidPath = config('hypercacheio.go_server.pid_path');
-        if (! File::exists($pidPath)) {
-            $this->info('Go server is NOT running.');
+        $host = config('hypercacheio.go_server.host');
+        $port = config('hypercacheio.go_server.port');
+
+        // 1. PID-file check (artisan-managed process)
+        if (File::exists($pidPath)) {
+            $pid = trim(File::get($pidPath));
+            if ($this->isProcessRunning($pid)) {
+                $this->info("Go server is running (PID: $pid) [artisan-managed]");
+                $this->line("Listening on: {$host}:{$port}");
+
+                return;
+            }
+
+            $this->warn("PID file exists ($pid) but process is NOT running. Cleaning up.");
+            File::delete($pidPath);
+        }
+
+        // 2. Fallback: check systemd / launchd (service-managed process)
+        $svcName = 'hypercacheio-server';
+        $os = strtolower(PHP_OS_FAMILY);
+
+        if ($os === 'darwin') {
+            $output = shell_exec("launchctl list 2>/dev/null | grep $svcName");
+            if ($output && ! str_contains($output, '-	0')) {
+                $this->info("Go server is running [launchd service: $svcName]");
+                $this->line("Listening on: {$host}:{$port}");
+
+                return;
+            }
+        } else {
+            $output = shell_exec("systemctl is-active $svcName 2>/dev/null");
+            if (trim($output ?? '') === 'active') {
+                $pid = trim(shell_exec("systemctl show --property=MainPID --value $svcName 2>/dev/null") ?? '');
+                $this->info("Go server is running [systemd service: $svcName]".($pid && $pid !== '0' ? " (PID: $pid)" : ''));
+                $this->line("Listening on: {$host}:{$port}");
+
+                return;
+            }
+        }
+
+        // 3. Last resort: scan processes by binary name
+        $procOutput = shell_exec('pgrep -a hypercacheio-server 2>/dev/null');
+        if ($procOutput) {
+            $this->info('Go server process found (not managed by artisan or service):');
+            $this->line(trim($procOutput));
+            $this->line("Listening on: {$host}:{$port}");
 
             return;
         }
 
-        $pid = File::get($pidPath);
-        if ($this->isProcessRunning($pid)) {
-            $this->info("Go server is running (PID: $pid)");
-            $this->line('Listening on: '.config('hypercacheio.go_server.host').':'.config('hypercacheio.go_server.port'));
-        } else {
-            $this->warn("Go server PID file exists ($pid), but process is NOT running.");
-            File::delete($pidPath);
-        }
+        $this->info('Go server is NOT running.');
+        $this->line("Tip: start via 'php artisan hypercacheio:go-server service:start' or 'start'.");
     }
 
     protected function makeService()

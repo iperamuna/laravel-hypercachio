@@ -278,7 +278,10 @@ class ConnectivityCheckCommand extends Command
         $go = config('hypercacheio.go_server');
         $scheme = $go['ssl']['enabled'] ? 'https' : 'http';
 
-        return "{$scheme}://{$go['host']}:{$go['port']}/api/hypercacheio";
+        // Always connect via 127.0.0.1 for the local health check.
+        // Using the server's own external/LAN IP (e.g. 10.x.x.x) from the same host
+        // can cause a cURL timeout because traffic is not looped back correctly.
+        return "{$scheme}://127.0.0.1:{$go['port']}/api/hypercacheio";
     }
 
     protected function showFirewallAdvice(?string $targetUrl = null): void
