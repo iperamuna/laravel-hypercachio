@@ -1,3 +1,27 @@
+# Release Notes - v1.6.3
+
+**Laravel Hyper-Cache-IO**
+
+This update focuses on making the Go server configuration more dynamic and resilient to runtime environment changes.
+
+## ⚙️ Dynamic Configuration
+The Go binary now supports environment variables as fallbacks for all key configuration flags. This means you can now set your configuration directly in your environment or service file, and the binary will pick them up automatically.
+
+- **Available Environment Variables**:
+    - `HYPERCACHEIO_API_TOKEN`
+    - `HYPERCACHEIO_SQLITE_PATH`
+    - `HYPERCACHEIO_CACHE_PREFIX`
+    - `HYPERCACHEIO_GO_PORT`
+    - `HYPERCACHEIO_GO_HOST`
+    - `HYPERCACHEIO_PEER_ADDRS`
+
+## 🛠 Passable Config Flags
+We've updated the `hypercacheio:go-server start` and `make-service` commands to explicitly pass the `--prefix` and `--sqlite-path` config values from your Laravel configuration to the Go binary. 
+
+This ensures that any changes you make to your `.env` file are immediately reflected in the Go daemon when restarted, without needing to re-compile the binary.
+
+---
+
 # Release Notes - v1.6.1
 
 **Laravel Hyper-Cache-IO**

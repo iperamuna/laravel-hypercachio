@@ -61,7 +61,7 @@ class GoServerCommand extends Command
                 $this->serviceStatus();
                 break;
             default:
-                $this->error('Unknown action: '.$action);
+                $this->error('Unknown action: ' . $action);
 
                 return 1;
         }
@@ -71,7 +71,7 @@ class GoServerCommand extends Command
 
     protected function compile()
     {
-        if (! $this->laravel->environment('local')) {
+        if (!$this->laravel->environment('local')) {
             $this->error('The compile action is only available in local environments.');
 
             return;
@@ -79,10 +79,10 @@ class GoServerCommand extends Command
 
         $this->info('Checking Go installation...');
 
-        if (! $this->isGoInstalled()) {
+        if (!$this->isGoInstalled()) {
             $this->warn('Go is not installed.');
 
-            if (! $this->confirm('Do you want to install Go and required libraries?', true)) {
+            if (!$this->confirm('Do you want to install Go and required libraries?', true)) {
                 $this->error('Go is required for compilation. Action aborted.');
 
                 return;
@@ -92,10 +92,10 @@ class GoServerCommand extends Command
         }
 
         $this->info('Compiling Go server binaries...');
-        $goPath = __DIR__.'/../../go-server';
+        $goPath = __DIR__ . '/../../go-server';
         $binDir = config('hypercacheio.go_server.build_path');
 
-        if (! File::exists($binDir)) {
+        if (!File::exists($binDir)) {
             File::makeDirectory($binDir, 0755, true);
         }
 
@@ -103,7 +103,7 @@ class GoServerCommand extends Command
         $result = 1;
         $output = [];
 
-        if (File::exists($goPath.'/Makefile')) {
+        if (File::exists($goPath . '/Makefile')) {
             $this->info('Found Makefile, building all architectures...');
             $command = "cd $goPath && OUT_DIR=\"$binDir\" make all";
             exec($command, $output, $result);
@@ -117,7 +117,7 @@ class GoServerCommand extends Command
         if ($result === 0) {
             $this->info("Go server compiled successfully to: $binDir");
         } else {
-            $this->error('Compilation failed: '.implode("\n", $output));
+            $this->error('Compilation failed: ' . implode("\n", $output));
         }
     }
 
@@ -176,28 +176,29 @@ class GoServerCommand extends Command
 
         $binPath = $config['bin_path'] ?? $this->detectBinary();
 
-        if (! $binPath || ! File::exists($binPath)) {
-            $this->warn('Go server binary not found. Tested path: '.($binPath ?: 'none').". Please run 'php artisan hypercacheio:go-server compile' first.");
+        if (!$binPath || !File::exists($binPath)) {
+            $this->warn('Go server binary not found. Tested path: ' . ($binPath ?: 'none') . ". Please run 'php artisan hypercacheio:go-server compile' first.");
 
             return;
         }
 
-        $this->info('Starting Go server using binary: '.basename($binPath));
+        $this->info('Starting Go server using binary: ' . basename($binPath));
 
         $listenHost = $config['listen_host'] ?? '0.0.0.0';
 
         $sqliteDir = config('hypercacheio.sqlite_path') ?? storage_path('hypercacheio');
-        $sqlitePath = rtrim($sqliteDir, '/').'/hypercacheio.sqlite';
+        $sqlitePath = rtrim($sqliteDir, '/') . '/hypercacheio.sqlite';
         $prefix = config('cache.prefix') ?? '';
         $directSqlite = config('hypercacheio.go_server.direct_sqlite', true) ? 'true' : 'false';
 
         $args = [
             "--port={$config['port']}",
             "--host={$listenHost}",
-            '--token='.config('hypercacheio.api_token'),
-            '--artisan="'.base_path('artisan').'"',
-            '--sqlite-path="'.$sqlitePath.'"',
-            '--direct-sqlite='.$directSqlite,
+            '--token=' . config('hypercacheio.api_token'),
+            '--artisan="' . base_path('artisan') . '"',
+            '--sqlite-path="' . $sqlitePath . '"',
+            '--prefix="' . $prefix . '"',
+            '--direct-sqlite=' . $directSqlite,
         ];
 
         if ($config['ssl']['enabled']) {
@@ -206,13 +207,13 @@ class GoServerCommand extends Command
             $args[] = "--key={$config['ssl']['certificate_key']}";
         }
 
-        if ($config['ha_mode'] && ! empty($config['peer_addrs'])) {
+        if ($config['ha_mode'] && !empty($config['peer_addrs'])) {
             $args[] = "--peers={$config['peer_addrs']}";
             $args[] = "--repl-port={$config['repl_port']}";
         }
 
         $logPath = $config['log_path'];
-        $command = "nohup $binPath ".implode(' ', $args)." > $logPath 2>&1 & echo $!";
+        $command = "nohup $binPath " . implode(' ', $args) . " > $logPath 2>&1 & echo $!";
 
         $pid = trim(shell_exec($command));
 
@@ -228,14 +229,14 @@ class GoServerCommand extends Command
     {
         $binDir = config('hypercacheio.go_server.build_path');
         $binName = $this->getBinaryName();
-        $path = $binDir.'/'.$binName;
+        $path = $binDir . '/' . $binName;
 
         if (File::exists($path)) {
             return realpath($path);
         }
 
         // Fallback to non-platform specific if it exists (for legacy/manual builds)
-        $fallback = $binDir.'/hypercacheio-server';
+        $fallback = $binDir . '/hypercacheio-server';
         if (File::exists($fallback)) {
             return realpath($fallback);
         }
@@ -260,7 +261,7 @@ class GoServerCommand extends Command
     protected function stop()
     {
         $pidPath = config('hypercacheio.go_server.pid_path');
-        if (! File::exists($pidPath)) {
+        if (!File::exists($pidPath)) {
             $this->warn('Go server is not running.');
 
             return;
@@ -307,7 +308,7 @@ class GoServerCommand extends Command
 
         if ($os === 'darwin') {
             $output = shell_exec("launchctl list 2>/dev/null | grep $svcName");
-            if ($output && ! str_contains($output, '-	0')) {
+            if ($output && !str_contains($output, '-	0')) {
                 $this->info("Go server is running [launchd service: $svcName]");
                 $this->line("Listening on: {$host}:{$port}");
 
@@ -317,7 +318,7 @@ class GoServerCommand extends Command
             $output = shell_exec("systemctl is-active $svcName 2>/dev/null");
             if (trim($output ?? '') === 'active') {
                 $pid = trim(shell_exec("systemctl show --property=MainPID --value $svcName 2>/dev/null") ?? '');
-                $this->info("Go server is running [systemd service: $svcName]".($pid && $pid !== '0' ? " (PID: $pid)" : ''));
+                $this->info("Go server is running [systemd service: $svcName]" . ($pid && $pid !== '0' ? " (PID: $pid)" : ''));
                 $this->line("Listening on: {$host}:{$port}");
 
                 return;
@@ -345,7 +346,7 @@ class GoServerCommand extends Command
         $config = config('hypercacheio.go_server');
         $binPath = $config['bin_path'] ?? $this->detectBinary();
 
-        if (! $binPath || ! File::exists($binPath)) {
+        if (!$binPath || !File::exists($binPath)) {
             $this->error('Go server binary not found. Please compile it first.');
 
             return;
@@ -354,17 +355,18 @@ class GoServerCommand extends Command
         $listenHost = $config['listen_host'] ?? '0.0.0.0';
 
         $sqliteDir = config('hypercacheio.sqlite_path') ?? storage_path('hypercacheio');
-        $sqlitePath = rtrim($sqliteDir, '/').'/hypercacheio.sqlite';
+        $sqlitePath = rtrim($sqliteDir, '/') . '/hypercacheio.sqlite';
         $prefix = config('cache.prefix') ?? '';
         $directSqlite = config('hypercacheio.go_server.direct_sqlite', true) ? 'true' : 'false';
 
         $argsList = [
             "--port={$config['port']}",
             "--host={$listenHost}",
-            '--token='.config('hypercacheio.api_token'),
-            '--artisan="'.base_path('artisan').'"',
-            '--sqlite-path="'.$sqlitePath.'"',
-            '--direct-sqlite='.$directSqlite,
+            '--token=' . config('hypercacheio.api_token'),
+            '--artisan="' . base_path('artisan') . '"',
+            '--sqlite-path="' . $sqlitePath . '"',
+            '--prefix="' . $prefix . '"',
+            '--direct-sqlite=' . $directSqlite,
         ];
 
         if ($config['ssl']['enabled'] ?? false) {
@@ -373,18 +375,18 @@ class GoServerCommand extends Command
             $argsList[] = "--key={$config['ssl']['certificate_key']}";
         }
 
-        if ($config['ha_mode'] && ! empty($config['peer_addrs'])) {
+        if ($config['ha_mode'] && !empty($config['peer_addrs'])) {
             $argsList[] = "--peers={$config['peer_addrs']}";
             $argsList[] = "--repl-port={$config['repl_port']}";
         }
 
-        $fullCommand = "$binPath ".implode(' ', $argsList);
+        $fullCommand = "$binPath " . implode(' ', $argsList);
         $user = get_current_user();
         $baseDir = base_path();
         $logPath = $config['log_path'];
 
         // 1. Systemd (Linux)
-        $systemdStubPath = __DIR__.'/../../stubs/systemd.service.stub';
+        $systemdStubPath = __DIR__ . '/../../stubs/systemd.service.stub';
         if (File::exists($systemdStubPath)) {
             $systemd = File::get($systemdStubPath);
             $systemd = str_replace(
@@ -399,7 +401,7 @@ class GoServerCommand extends Command
         }
 
         // 2. Launchd (macOS)
-        $launchdStubPath = __DIR__.'/../../stubs/launchd.plist.stub';
+        $launchdStubPath = __DIR__ . '/../../stubs/launchd.plist.stub';
         if (File::exists($launchdStubPath)) {
             $launchd = File::get($launchdStubPath);
 
@@ -422,8 +424,8 @@ class GoServerCommand extends Command
 
         $this->newLine();
         $this->comment('Installation Instructions:');
-        $this->line('- Linux: sudo cp '.base_path('hypercacheio-server.service').' /etc/systemd/system/ && sudo systemctl enable --now hypercacheio-server');
-        $this->line('- macOS: cp '.base_path('iperamuna.hypercacheio.server.plist').' ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/iperamuna.hypercacheio.server.plist');
+        $this->line('- Linux: sudo cp ' . base_path('hypercacheio-server.service') . ' /etc/systemd/system/ && sudo systemctl enable --now hypercacheio-server');
+        $this->line('- macOS: cp ' . base_path('iperamuna.hypercacheio.server.plist') . ' ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/iperamuna.hypercacheio.server.plist');
     }
 
     protected function isProcessRunning($pid)
@@ -444,10 +446,10 @@ class GoServerCommand extends Command
         $os = strtolower(PHP_OS_FAMILY);
 
         if ($os === 'darwin') {
-            $plist = getenv('HOME').'/Library/LaunchAgents/iperamuna.hypercacheio.server.plist';
+            $plist = getenv('HOME') . '/Library/LaunchAgents/iperamuna.hypercacheio.server.plist';
             $svcName = $this->getServiceNames()['launchd'];
 
-            if (! file_exists($plist)) {
+            if (!file_exists($plist)) {
                 $this->error("Launchd plist not found at: $plist");
                 $this->line("Run 'php artisan hypercacheio:go-server make-service' first, then copy it there.");
 
@@ -472,7 +474,7 @@ class GoServerCommand extends Command
         $os = strtolower(PHP_OS_FAMILY);
 
         if ($os === 'darwin') {
-            $plist = getenv('HOME').'/Library/LaunchAgents/iperamuna.hypercacheio.server.plist';
+            $plist = getenv('HOME') . '/Library/LaunchAgents/iperamuna.hypercacheio.server.plist';
             $svcName = $this->getServiceNames()['launchd'];
             passthru("launchctl unload -w $plist", $code);
             $code === 0
@@ -491,14 +493,14 @@ class GoServerCommand extends Command
     {
         $os = strtolower(PHP_OS_FAMILY);
 
-        if (! $this->confirm('This will disable and remove the system service. Continue?', false)) {
+        if (!$this->confirm('This will disable and remove the system service. Continue?', false)) {
             $this->info('Aborted.');
 
             return;
         }
 
         if ($os === 'darwin') {
-            $plist = getenv('HOME').'/Library/LaunchAgents/iperamuna.hypercacheio.server.plist';
+            $plist = getenv('HOME') . '/Library/LaunchAgents/iperamuna.hypercacheio.server.plist';
             $svcName = $this->getServiceNames()['launchd'];
 
             if (file_exists($plist)) {

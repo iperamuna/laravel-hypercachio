@@ -67,6 +67,7 @@ type Payload struct {
 }
 
 func main() {
+	// 1. Define flags
 	flag.IntVar(&port, "port", 8080, "Port for HTTP API (Laravel)")
 	flag.StringVar(&host, "host", "127.0.0.1", "Host for HTTP API")
 	flag.StringVar(&apiToken, "token", "", "API Token for authentication")
@@ -75,14 +76,34 @@ func main() {
 	flag.StringVar(&sslKey, "key", "", "SSL Key path")
 	flag.StringVar(&artisanPath, "artisan", "php artisan", "Path to artisan command")
 	flag.StringVar(&sqlitePath, "sqlite-path", "", "Path to SQLite database (optional persistence)")
-	flag.StringVar(&cachePrefix, "prefix", "", "Legacy prefix (now handled by Laravel)")
+	flag.StringVar(&cachePrefix, "prefix", "", "Cache prefix")
 	flag.BoolVar(&directSqlite, "direct-sqlite", true, "Use internal caching logic")
 	flag.StringVar(&peerAddrs, "peers", "", "Comma-separated list of peer addresses (host:port) for TCP replication")
 	flag.IntVar(&replPort, "repl-port", 7400, "Port to listen for incoming replication")
 	flag.Parse()
 
+	// 2. Fallback to environment variables if flags are not set
 	if apiToken == "" {
-		log.Fatal("API Token is required")
+		apiToken = os.Getenv("HYPERCACHEIO_API_TOKEN")
+	}
+	if sqlitePath == "" {
+		sqlitePath = os.Getenv("HYPERCACHEIO_SQLITE_PATH")
+	}
+	if cachePrefix == "" {
+		cachePrefix = os.Getenv("HYPERCACHEIO_CACHE_PREFIX")
+	}
+	if peerAddrs == "" {
+		peerAddrs = os.Getenv("HYPERCACHEIO_PEER_ADDRS")
+	}
+	if port == 8080 && os.Getenv("HYPERCACHEIO_GO_PORT") != "" {
+		fmt.Sscanf(os.Getenv("HYPERCACHEIO_GO_PORT"), "%d", &port)
+	}
+	if host == "127.0.0.1" && os.Getenv("HYPERCACHEIO_GO_HOST") != "" {
+		host = os.Getenv("HYPERCACHEIO_GO_HOST")
+	}
+
+	if apiToken == "" {
+		log.Fatal("API Token is required (via --token flag or HYPERCACHEIO_API_TOKEN environment variable)")
 	}
 
 	// Initialize SQLite if provided (optional persistence)

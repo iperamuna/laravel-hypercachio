@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.3] - 2026-02-24
+
+### Added
+- **Dynamic Configuration**: The Go binary now supports environment variable fallbacks for all key flags (`HYPERCACHEIO_API_TOKEN`, `HYPERCACHEIO_SQLITE_PATH`, `HYPERCACHEIO_CACHE_PREFIX`, etc.).
+- **Improved Flag Passing**: The `hypercacheio:go-server start` and `make-service` commands now explicitly pass the `--prefix` and `--sqlite-path` config values to ensure the binary reflects any runtime `.env` changes without requiring re-compilation.
+
+## [1.6.2] - 2026-02-24
+
+### Fixed
+- **Code Style**: Applied Laravel Pint formatting across the entire codebase to ensure PSR-12 and Laravel standard compliance.
+
 ## [1.6.1] - 2026-02-24
 
 ### Fixed
