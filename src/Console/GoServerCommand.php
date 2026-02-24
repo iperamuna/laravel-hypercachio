@@ -186,11 +186,19 @@ class GoServerCommand extends Command
 
         $listenHost = $config['listen_host'] ?? '0.0.0.0';
 
+        $sqliteDir = config('hypercacheio.sqlite_path') ?? storage_path('hypercacheio');
+        $sqlitePath = rtrim($sqliteDir, '/').'/hypercacheio.sqlite';
+        $prefix = config('cache.prefix') ?? '';
+        $directSqlite = config('hypercacheio.go_server.direct_sqlite', true) ? 'true' : 'false';
+
         $args = [
             "--port={$config['port']}",
             "--host={$listenHost}",
             '--token='.config('hypercacheio.api_token'),
             '--artisan="'.base_path('artisan').'"',
+            '--sqlite-path="'.$sqlitePath.'"',
+            '--prefix="'.$prefix.'"',
+            '--direct-sqlite='.$directSqlite,
         ];
 
         if ($config['ssl']['enabled']) {
@@ -341,11 +349,19 @@ class GoServerCommand extends Command
 
         $listenHost = $config['listen_host'] ?? '0.0.0.0';
 
+        $sqliteDir = config('hypercacheio.sqlite_path') ?? storage_path('hypercacheio');
+        $sqlitePath = rtrim($sqliteDir, '/').'/hypercacheio.sqlite';
+        $prefix = config('cache.prefix') ?? '';
+        $directSqlite = config('hypercacheio.go_server.direct_sqlite', true) ? 'true' : 'false';
+
         $argsList = [
             "--port={$config['port']}",
             "--host={$listenHost}",
             '--token='.config('hypercacheio.api_token'),
             '--artisan="'.base_path('artisan').'"',
+            '--sqlite-path="'.$sqlitePath.'"',
+            '--prefix="'.$prefix.'"',
+            '--direct-sqlite='.$directSqlite,
         ];
 
         if ($config['ssl']['enabled'] ?? false) {

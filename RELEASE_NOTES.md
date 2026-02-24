@@ -1,3 +1,32 @@
+# Release Notes - v1.5.1
+
+**Laravel Hyper-Cache-IO**
+
+This update moves the binary storage location and adds a configuration toggle for direct SQLite execution.
+
+## 📁 Binary Path Change
+*   **Location**: We have moved the default Go build output from `storage/hypercacheio/bin` to `resources/hypercacheio/bin`. 
+*   **Commitable Binaries**: This allows you to compile binaries locally and commit them to your version control system, enabling production deployments without requiring a Go installation on the server.
+
+## ⚙️ Configuration
+*   **Direct SQLite Toggle**: Added `HYPERCACHEIO_GO_DIRECT_SQLITE` to the `go_server` config. Set to `true` (default) for maximum performance, or `false` to use the legacy Artisan relay.
+
+---
+
+# Release Notes - v1.5.0
+
+**Laravel Hyper-Cache-IO**
+
+This major update introduces direct SQLite integration for the Go server, providing significant performance improvements.
+
+## 🚀 Native SQLite Backend
+The Go server now interacts directly with the SQLite database.
+*   **Performance**: By bypassing the `php artisan` bootstrap overhead, cache operation response times have dropped from ~50ms to **less than 1ms**.
+*   **PHP Serialization**: Implemented native PHP serialization support in Go to ensure full compatibility with data stored by the Laravel application.
+*   **Atomic Operations**: Native support for atomic `add` and distributed locking directly in the Go daemon.
+
+---
+
 # Release Notes - v1.4.1
 
 **Laravel Hyper-Cache-IO**

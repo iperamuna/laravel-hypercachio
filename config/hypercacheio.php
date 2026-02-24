@@ -171,6 +171,13 @@ return [
     */
     'go_server' => [
         /*
+         * When set to true, the Go server will interact directly with the SQLite
+         * database for caching and locking operations instead of relaying requests
+         * through `php artisan`. This drastically improves performance.
+         * Env: HYPERCACHEIO_GO_DIRECT_SQLITE
+         */
+        'direct_sqlite' => env('HYPERCACHEIO_GO_DIRECT_SQLITE', true),
+        /*
          * The external/advertised host IP — used by secondary servers to connect here
          * and shown in status/connectivity-check output.
          * Env: HYPERCACHEIO_GO_HOST
@@ -198,7 +205,7 @@ return [
             'certificate_key' => env('HYPERCACHEIO_GO_SSL_KEY', ''),
         ],
         'bin_path' => null, // If null, the command will try to find the correct binary in the build folder.
-        'build_path' => storage_path('hypercacheio/bin'),
+        'build_path' => resource_path('hypercacheio/bin'),
         'log_path' => storage_path('logs/hypercacheio-server.log'),
         'pid_path' => storage_path('hypercacheio-server.pid'),
     ],

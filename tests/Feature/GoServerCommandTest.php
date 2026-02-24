@@ -5,20 +5,20 @@ use Illuminate\Support\Facades\File;
 use function Pest\Laravel\artisan;
 
 beforeEach(function () {
-    $binDir = __DIR__.'/../../build';
+    $binDir = __DIR__ . '/../../build';
 
-    if (! File::exists($binDir)) {
+    if (!File::exists($binDir)) {
         File::makeDirectory($binDir, 0755, true);
     }
 
-    config(['hypercacheio.go_server.build_path' => $binDir]);
+    config(['hypercacheio.go_server.build_path' => resource_path('hypercacheio/bin')]);
     config(['hypercacheio.go_server.listen_host' => '0.0.0.0']);
 });
 
 it('can generate service files via make-service', function () {
     $binDir = config('hypercacheio.go_server.build_path');
-    $binName = 'hypercacheio-server-'.strtolower(PHP_OS_FAMILY).'-'.(strtolower(php_uname('m')) === 'x86_64' ? 'amd64' : 'arm64');
-    $binPath = $binDir.'/'.$binName;
+    $binName = 'hypercacheio-server-' . strtolower(PHP_OS_FAMILY) . '-' . (strtolower(php_uname('m')) === 'x86_64' ? 'amd64' : 'arm64');
+    $binPath = $binDir . '/' . $binName;
     File::put($binPath, 'dummy-binary');
 
     artisan('hypercacheio:go-server make-service')

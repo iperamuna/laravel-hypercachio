@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.1] - 2026-02-24
+
+### Added
+- **Direct SQLite Toggle**: Added `HYPERCACHEIO_GO_DIRECT_SQLITE` configuration to allow switching between high-performance native SQLite mode and the legacy Artisan relay mode.
+
+### Changed
+- **Binary Storage Location**: Moved default Go build output from `storage/hypercacheio/bin` to `resources/hypercacheio/bin`. This allows pre-compiled binaries to be committed to the repository for easier deployment.
+- **Pint Formatting**: Applied Laravel Pint coding standards across the PHP codebase.
+
+## [1.5.0] - 2026-02-24
+
+### Added
+- **Direct SQLite Execution for Go Server**: The standalone Go server (`hypercacheio-server`) now includes native SQLite and PHP Serialization capabilities. By removing the overhead of booting the Laravel framework via `php artisan` relay commands, cache response times drop from ~50ms to < 1ms. 
+- **Command Update**: The Go Server CLI commands (`hypercacheio:go-server start` and `make-service`) now automatically supply the SQLite database path (`--sqlite-path`) and cache prefix (`--prefix`) directly to the Go daemon.
+
 ## [1.4.5] - 2026-02-24
 
 ### Added
