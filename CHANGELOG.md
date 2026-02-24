@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2026-02-24
+
+### Fixed
+- **Test Infrastructure**: Fixed a path issue in `GoServerCommandTest.php` that caused CI failures on Linux runners by using a more consistent temporary binary path.
+
 ## [1.6.0] - 2026-02-24
 
 ### Added

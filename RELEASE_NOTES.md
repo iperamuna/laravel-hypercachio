@@ -1,3 +1,14 @@
+# Release Notes - v1.6.1
+
+**Laravel Hyper-Cache-IO**
+
+This patch release fixes a CI/CD infrastructure issue.
+
+## 🛠 Bug Fixes
+*   **CI Stability**: Fixed a directory creation issue in `GoServerCommandTest.php` that occurred on certain Linux environments when using `resource_path()`. The test suite now uses its own local `tests/bin` directory for temporary binary management.
+
+---
+
 # Release Notes - v1.6.0
 
 **Laravel Hyper-Cache-IO**
