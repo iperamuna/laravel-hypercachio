@@ -20,6 +20,7 @@ Designed for modern PHP environments like **FrankenPHP**, **Swoole**, and tradit
 - **🔒 Distributed Locking**: Full support for atomic locks across multiple servers.
 - **⚡ Atomic Operations**: Native support for `Cache::add()` and atomic `increment`/`decrement`.
 - **🌐 HTTP Synchronization**: Robust Primary/Secondary architecture for multi-node setups.
+- **🧹 Background GC**: Proactive background cleanup of expired items and locks to ensure memory efficiency.
 - **🛡️ Secure**: Token-based authentication protects your internal cache API.
 - **✅ Modern Compatibility**: Fully supports Laravel 10.x, 11.x, and 12.x.
 

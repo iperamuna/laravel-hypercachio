@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/yvasiyarov/php_session_decoder/php_serialize"
 	_ "modernc.org/sqlite"
@@ -39,6 +40,7 @@ func setupTestDB(t *testing.T) (*sql.DB, func()) {
 	// Override the global db variable in main.go
 	db = tDB
 	cachePrefix = "test_prefix:"
+	cache = make(map[string]CacheItem)
 
 	cleanup := func() {
 		tDB.Close()
@@ -173,4 +175,68 @@ func TestDirectSqliteFlag(t *testing.T) {
 		t.Errorf("DB was NOT initialized when directSqlite was true")
 	}
 	db.Close()
+}
+func TestCleanupExpired(t *testing.T) {
+	_, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	now := time.Now().Unix()
+
+	cacheMutex.Lock()
+	// Item 1: Not expired
+	cache["valid"] = CacheItem{Value: []byte("value"), Expiration: now + 60}
+	// Item 2: Expired
+	cache["expired"] = CacheItem{Value: []byte("value"), Expiration: now - 60}
+	// Item 3: No expiration
+	cache["permanent"] = CacheItem{Value: []byte("value"), Expiration: 0}
+	cacheMutex.Unlock()
+
+	// Initial count
+	if len(cache) != 3 {
+		t.Errorf("Expected 3 items, got %d", len(cache))
+	}
+
+	cleanupExpired()
+
+	if len(cache) != 2 {
+		t.Errorf("Expected 2 items after cleanup, got %d", len(cache))
+	}
+
+	cacheMutex.RLock()
+	if _, exists := cache["expired"]; exists {
+		t.Errorf("Expired item still exists in cache")
+	}
+	cacheMutex.RUnlock()
+}
+
+func TestHandleItemsFiltering(t *testing.T) {
+	_, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	now := time.Now().Unix()
+
+	cacheMutex.Lock()
+	cache["valid"] = CacheItem{Value: []byte("s:5:\"value\";"), Expiration: now + 60}
+	cache["expired"] = CacheItem{Value: []byte("s:5:\"value\";"), Expiration: now - 60}
+	cacheMutex.Unlock()
+
+	req, _ := http.NewRequest("GET", "/api/hypercacheio/items", nil)
+	rr := httptest.NewRecorder()
+
+	handleItems(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handleItems returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+
+	var items []map[string]interface{}
+	json.Unmarshal(rr.Body.Bytes(), &items)
+
+	if len(items) != 1 {
+		t.Errorf("Expected 1 item in response, got %d", len(items))
+	}
+
+	if items[0]["key"] != "valid" {
+		t.Errorf("Expected key 'valid', got %v", items[0]["key"])
+	}
 }

@@ -149,6 +149,9 @@ func main() {
 			}
 		}
 	}
+	
+	// Start background cleanup for expired items
+	startCleanupTimer()
 
 	// Start HTTP API for Laravel
 	mux := http.NewServeMux()
@@ -539,6 +542,39 @@ func loadFromSqlite() {
 	log.Printf("Loaded %d items from SQLite persistence", count)
 }
 
+func startCleanupTimer() {
+	ticker := time.NewTicker(30 * time.Second)
+	go func() {
+		for range ticker.C {
+			cleanupExpired()
+		}
+	}()
+}
+
+func cleanupExpired() {
+	now := time.Now().Unix()
+	count := 0
+	
+	cacheMutex.Lock()
+	for k, v := range cache {
+		if v.Expiration > 0 && v.Expiration < now {
+			delete(cache, k)
+			count++
+		}
+	}
+	cacheMutex.Unlock()
+
+	if count > 0 {
+		log.Printf("Background cleanup: removed %d expired items", count)
+		if db != nil {
+			_, err := db.Exec("DELETE FROM cache WHERE expiration > 0 AND expiration < ?", now)
+			if err != nil {
+				log.Printf("Failed to cleanup SQLite expired items: %v", err)
+			}
+		}
+	}
+}
+
 // -------------------------------------------------------------
 // HTTP Handlers (for Laravel)
 // -------------------------------------------------------------
@@ -749,7 +785,13 @@ func handleItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	items := make([]Item, 0, len(cache))
+	now := time.Now().Unix()
+	
 	for k, v := range cache {
+		if v.Expiration > 0 && v.Expiration < now {
+			continue
+		}
+		
 		isLock := strings.HasPrefix(k, "lock:")
 
 		var parsedValue interface{}

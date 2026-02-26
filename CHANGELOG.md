@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.6] - 2026-02-26
+
+### Added
+- **Proactive Garbage Collection**: The Go server now includes a background cleanup timer that automatically sweeps and removes expired cache items and locks from memory every 30 seconds.
+- **Persistent Cleanup**: Expired items removed by the background timer are also deleted from the SQLite database to prevent stale data from reappearing on server restart.
+- **Strict Response Filtering**: The `/api/hypercacheio/items` endpoint now filters out expired items in real-time, ensuring accurate monitoring in dashboards.
+- **Improved Test Coverage**: Added dedicated Go test suites for the new cleanup and filtering logic.
+
+
 ## [1.6.4] - 2026-02-24
 
 ### Added

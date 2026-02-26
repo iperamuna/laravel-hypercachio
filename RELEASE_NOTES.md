@@ -1,3 +1,17 @@
+# Release Notes - v1.6.6
+
+**Laravel Hyper-Cache-IO**
+
+This release significantly improves the memory management of the Go server by introducing proactive background cleanup for expired items.
+
+## 🧹 Proactive Garbage Collection
+The Go server is now smarter about memory management. Instead of relying purely on request-time checks, it now runs a background "janitor" process.
+- **Background Sweep**: Every 30 seconds, the server identifies and removes expired cache entries and locks from its internal memory.
+- **SQLite Synchronization**: Expired items found during the sweep are automatically purged from the persistent SQLite database, ensuring your storage remains clean and compact.
+- **Accurate Monitoring**: The inspection API now strictly filters out expired items, providing a precise view of the active state in your Filament dashboards.
+
+---
+
 # Release Notes - v1.6.5
 
 **Laravel Hyper-Cache-IO**
